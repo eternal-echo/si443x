@@ -1,13 +1,20 @@
 /**
- * System Driver Header File
- * 
- * @file system.h
- * 
- * @defgroup systemdriver System Driver
- * 
- * @brief This file contains the API prototype for the System Driver.
- *
- * @version Driver Version 1.0.0
+  SPI Generated Driver API Interface File
+
+  @Company
+    Microchip Technology Inc.
+
+  @File Name
+    spi_interface.h
+
+  @Summary
+    This is the generated driver interface file for the SPI driver.
+
+  @Description
+    This Interface file provides APIs for driver for SPI.
+    The generated drivers are tested against the following:
+        Compiler          :  XC8 v2.30 and above
+        MPLAB             :  MPLABX v5.45 and above
 */
 
 /*
@@ -31,25 +38,37 @@
     THIS SOFTWARE.
 */
 
-#ifndef SYSTEM_H
-#define	SYSTEM_H
-
-#include <xc.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include "config_bits.h"
-#include "../system/clock.h"
-#include "../system/pins.h"
-#include "../uart/eusart.h"
-#include "../spi/mssp1.h"
-#include "../system/interrupt.h"
+#ifndef SPI_INTERFACE_H
+#define SPI_INTERFACE_H
 
 /**
- * @ingroup systemdriver
- * @brief Initializes the system module. This is called only once before calling other APIs.
- * @param None.
- * @return None.
+ Section: Included Files
 */
-void SYSTEM_Initialize(void);
+#include <stdint.h>
+#include <stdbool.h>
+#include <stddef.h>
 
-#endif //SYSTEM_H
+/**
+ Section: Data Type Definitions
+*/
+        
+/**
+  SPI Driver function structure.
+
+  @Summary
+    Structure containing the function pointers of SPI driver.
+ */
+struct SPI_INTERFACE
+{   
+    void (*Initialize)(void);
+    void (*Close)(void);
+    bool (*Open)(uint8_t spiConfigIndex);
+    void (*BufferExchange)(void *bufferData, size_t bufferSize);
+    void (*BufferRead)(void *bufferData, size_t bufferSize);
+    void (*BufferWrite)(void *bufferData, size_t bufferSize); 
+    uint8_t (*ByteExchange)(uint8_t byteData);    
+    uint8_t (*ByteRead)(void);
+    void (*ByteWrite)(uint8_t byteData);
+};
+
+#endif //SPI_INTERFACE_H
