@@ -106,6 +106,63 @@
 #define IO_RB7_SetOpenDrain()       do { ODCONBbits.ODCB7 = 1; } while(0)
 #define IO_RB7_SetAnalogMode()      do { ANSELBbits.ANSB7 = 1; } while(0)
 #define IO_RB7_SetDigitalMode()     do { ANSELBbits.ANSB7 = 0; } while(0)
+// get/set IO_RC3 aliases
+#define SPI_CS_TRIS                 TRISCbits.TRISC3
+#define SPI_CS_LAT                  LATCbits.LATC3
+#define SPI_CS_PORT                 PORTCbits.RC3
+#define SPI_CS_WPU                  WPUCbits.WPUC3
+#define SPI_CS_OD                   ODCONCbits.ODCC3
+#define SPI_CS_ANS                  ANSELCbits.ANSC3
+#define SPI_CS_SetHigh()            do { LATCbits.LATC3 = 1; } while(0)
+#define SPI_CS_SetLow()             do { LATCbits.LATC3 = 0; } while(0)
+#define SPI_CS_Toggle()             do { LATCbits.LATC3 = ~LATCbits.LATC3; } while(0)
+#define SPI_CS_GetValue()           PORTCbits.RC3
+#define SPI_CS_SetDigitalInput()    do { TRISCbits.TRISC3 = 1; } while(0)
+#define SPI_CS_SetDigitalOutput()   do { TRISCbits.TRISC3 = 0; } while(0)
+#define SPI_CS_SetPullup()          do { WPUCbits.WPUC3 = 1; } while(0)
+#define SPI_CS_ResetPullup()        do { WPUCbits.WPUC3 = 0; } while(0)
+#define SPI_CS_SetPushPull()        do { ODCONCbits.ODCC3 = 0; } while(0)
+#define SPI_CS_SetOpenDrain()       do { ODCONCbits.ODCC3 = 1; } while(0)
+#define SPI_CS_SetAnalogMode()      do { ANSELCbits.ANSC3 = 1; } while(0)
+#define SPI_CS_SetDigitalMode()     do { ANSELCbits.ANSC3 = 0; } while(0)
+// get/set IO_RC4 aliases
+#define SI4431_IRQ_TRIS                 TRISCbits.TRISC4
+#define SI4431_IRQ_LAT                  LATCbits.LATC4
+#define SI4431_IRQ_PORT                 PORTCbits.RC4
+#define SI4431_IRQ_WPU                  WPUCbits.WPUC4
+#define SI4431_IRQ_OD                   ODCONCbits.ODCC4
+#define SI4431_IRQ_ANS                  ANSELCbits.ANSC4
+#define SI4431_IRQ_SetHigh()            do { LATCbits.LATC4 = 1; } while(0)
+#define SI4431_IRQ_SetLow()             do { LATCbits.LATC4 = 0; } while(0)
+#define SI4431_IRQ_Toggle()             do { LATCbits.LATC4 = ~LATCbits.LATC4; } while(0)
+#define SI4431_IRQ_GetValue()           PORTCbits.RC4
+#define SI4431_IRQ_SetDigitalInput()    do { TRISCbits.TRISC4 = 1; } while(0)
+#define SI4431_IRQ_SetDigitalOutput()   do { TRISCbits.TRISC4 = 0; } while(0)
+#define SI4431_IRQ_SetPullup()          do { WPUCbits.WPUC4 = 1; } while(0)
+#define SI4431_IRQ_ResetPullup()        do { WPUCbits.WPUC4 = 0; } while(0)
+#define SI4431_IRQ_SetPushPull()        do { ODCONCbits.ODCC4 = 0; } while(0)
+#define SI4431_IRQ_SetOpenDrain()       do { ODCONCbits.ODCC4 = 1; } while(0)
+#define SI4431_IRQ_SetAnalogMode()      do { ANSELCbits.ANSC4 = 1; } while(0)
+#define SI4431_IRQ_SetDigitalMode()     do { ANSELCbits.ANSC4 = 0; } while(0)
+// get/set IO_RC5 aliases
+#define SI4431_SDN_TRIS                 TRISCbits.TRISC5
+#define SI4431_SDN_LAT                  LATCbits.LATC5
+#define SI4431_SDN_PORT                 PORTCbits.RC5
+#define SI4431_SDN_WPU                  WPUCbits.WPUC5
+#define SI4431_SDN_OD                   ODCONCbits.ODCC5
+#define SI4431_SDN_ANS                  ANSELCbits.ANSC5
+#define SI4431_SDN_SetHigh()            do { LATCbits.LATC5 = 1; } while(0)
+#define SI4431_SDN_SetLow()             do { LATCbits.LATC5 = 0; } while(0)
+#define SI4431_SDN_Toggle()             do { LATCbits.LATC5 = ~LATCbits.LATC5; } while(0)
+#define SI4431_SDN_GetValue()           PORTCbits.RC5
+#define SI4431_SDN_SetDigitalInput()    do { TRISCbits.TRISC5 = 1; } while(0)
+#define SI4431_SDN_SetDigitalOutput()   do { TRISCbits.TRISC5 = 0; } while(0)
+#define SI4431_SDN_SetPullup()          do { WPUCbits.WPUC5 = 1; } while(0)
+#define SI4431_SDN_ResetPullup()        do { WPUCbits.WPUC5 = 0; } while(0)
+#define SI4431_SDN_SetPushPull()        do { ODCONCbits.ODCC5 = 0; } while(0)
+#define SI4431_SDN_SetOpenDrain()       do { ODCONCbits.ODCC5 = 1; } while(0)
+#define SI4431_SDN_SetAnalogMode()      do { ANSELCbits.ANSC5 = 1; } while(0)
+#define SI4431_SDN_SetDigitalMode()     do { ANSELCbits.ANSC5 = 0; } while(0)
 // get/set IO_RC6 aliases
 #define IO_RC6_TRIS                 TRISCbits.TRISC6
 #define IO_RC6_LAT                  LATCbits.LATC6

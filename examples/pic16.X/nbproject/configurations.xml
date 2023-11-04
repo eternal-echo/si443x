@@ -22,6 +22,8 @@
           <itemPath>mcc_generated_files/uart/uart_drv_interface.h</itemPath>
         </logicalFolder>
       </logicalFolder>
+      <itemPath>../../inc/si443x.h</itemPath>
+      <itemPath>si443x/port/si443x_io.h</itemPath>
     </logicalFolder>
     <logicalFolder name="SourceFiles" displayName="源文件" projectFiles="true">
       <logicalFolder name="MCC Generated Files"
@@ -48,6 +50,8 @@
         </logicalFolder>
       </logicalFolder>
       <itemPath>main.c</itemPath>
+      <itemPath>../../src/si443x.c</itemPath>
+      <itemPath>si443x/port/si443x_io.c</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript" displayName="链接器文件" projectFiles="true">
     </logicalFolder>
@@ -56,6 +60,11 @@
       <itemPath>pic16.mc3</itemPath>
     </logicalFolder>
   </logicalFolder>
+  <sourceRootList>
+    <Elem>../../src</Elem>
+    <Elem>../../inc</Elem>
+    <Elem>si443x/port</Elem>
+  </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
     <conf name="default" type="2">
