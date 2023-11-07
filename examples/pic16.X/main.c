@@ -35,9 +35,13 @@
 /*
     Main application
 */
+#define RX_BUFFER_SIZE 64
+uint8_t rx_buffer[RX_BUFFER_SIZE] = {0};
+int rx_count = 0;
 
 int main(void)
 {
+    uint8_t i = 0;
     SYSTEM_Initialize();
 
     // If using interrupts in PIC18 High/Low Priority Mode you need to enable the Global High and Low Interrupts 
@@ -45,13 +49,13 @@ int main(void)
     // Use the following macros to: 
 
     // Enable the Global Interrupts 
-    //INTERRUPT_GlobalInterruptEnable(); 
+    INTERRUPT_GlobalInterruptEnable(); 
 
     // Disable the Global Interrupts 
     //INTERRUPT_GlobalInterruptDisable(); 
 
     // Enable the Peripheral Interrupts 
-    //INTERRUPT_PeripheralInterruptEnable(); 
+    INTERRUPT_PeripheralInterruptEnable(); 
 
     // Disable the Peripheral Interrupts 
     //INTERRUPT_PeripheralInterruptDisable(); 
@@ -63,25 +67,42 @@ int main(void)
 
     while(1)
     {
+        i++;
+        if(si443x_is_packetReceived(&si443x) == SI443X_ERR_OK)
+        {
+            uint8_t readData[64];
+            uint8_t length;
+            printf("[radio][rx] Packet received\r\n");
+            length = si443x_get_packet_received(&si443x, readData);
+            printf("[radio][rx] payload: %.*s\r\n", length, readData);
+            printf("[radio][rx] length: %d\r\n", length);
+            printf("\r\n");
+
+            si443x_start_listening(&si443x);
+        }
         if(BUTTON_GetValue() == 0)
         {
             while(BUTTON_GetValue() == 0);
-            printf("Sending...\r\n");
+            printf("Button pressed\r\n");
             const uint8_t data[] = "Hello";
             si443x_send_packet(&si443x, data, sizeof(data));
             printf("Sent: %s\r\n", data);
             si443x_start_listening(&si443x);
         }
-        if(si443x_is_packetReceived(&si443x) == SI443X_ERR_OK)
-        {
-            uint8_t readData[64];
-            uint8_t length;
-            printf("[rx] Packet received\r\n");
-            length = si443x_get_packet_received(&si443x, readData);
-            printf("[rx] payload: %s\r\n", readData);
-            printf("\r\n");
-
-            si443x_start_listening(&si443x);
-        }
+        // if (UART1__IsRxReady())
+        // {
+        //     rx_count = 0;
+        //     while (UART1__IsRxReady() && rx_count < RX_BUFFER_SIZE)
+        //     {
+        //         uint8_t data = UART1_Read();
+        //         rx_buffer[rx_count] = data;
+        //         rx_count++;
+        //         __delay_ms(1);
+        //     }
+        //     rx_buffer[rx_count] = '\0';
+        //     printf("[UART][rx] payload: %s\r\n", rx_buffer);
+        //     printf("[UART][rx] length: %d\r\n", rx_count);
+        //     si443x_send_packet(&si443x, rx_buffer, rx_count);
+        // }
     }    
 }
