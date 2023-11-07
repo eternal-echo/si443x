@@ -703,6 +703,7 @@ uint8_t si443x_get_packet_received(si443x_t *si443x, uint8_t* readData)
     }
 
 	si443x_clear_rxFIFO(si443x); // which will also clear the interrupts
+    return length;
 }
 
 
