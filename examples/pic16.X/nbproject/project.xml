@@ -8,11 +8,7 @@
             <make-project-type>0</make-project-type>
             <sourceEncoding>UTF-8</sourceEncoding>
             <make-dep-projects/>
-            <sourceRootList>
-                <sourceRootElem>../../src</sourceRootElem>
-                <sourceRootElem>../../inc</sourceRootElem>
-                <sourceRootElem>si443x/port</sourceRootElem>
-            </sourceRootList>
+            <sourceRootList/>
             <confList>
                 <confElem>
                     <name>default</name>
