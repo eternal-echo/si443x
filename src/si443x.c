@@ -2,8 +2,6 @@
 #include "si443x_io.h"
 #include <math.h>
 
-#define MAX_TRANSMIT_TIMEOUT_MS 200
-
 #define SI443X_DEFAULT_FREQ 433
 #define SI443X_DEFAULT_CHANNEL 0
 #define SI443X_DEFAULT_BAUD_RATE 100
@@ -54,10 +52,10 @@ static void burst_read(si443x_t *si443x, uint8_t reg, uint8_t *data, uint8_t len
     si443x_gpio_set_cs(si443x);
 
     // DEBUG
-    SI443X_DEBUG_PRINT("burst_read: reg: %02x, data: ", reg);
-    for (i = 0; i < len; ++i) {
-        SI443X_DEBUG_PRINT("%02x ", data[i]);
-    }
+    // SI443X_DEBUG_PRINT("burst_read: reg: %02x, data: ", reg);
+    // for (i = 0; i < len; ++i) {
+    //     SI443X_DEBUG_PRINT("%02x ", data[i]);
+    // }
 }
 
 /**
@@ -101,7 +99,7 @@ static void change_register(si443x_t *si443x, uint8_t reg, uint8_t value)
 #ifdef SI443X_DEBUG
 	// reg = 0x07 and value = 0x80 is Software Register Reset Bit.
 	// This bit will be automatically cleared.
-    if(reg != 0x07 || value != 0x80) 
+    if((!(reg == 0x07 && value == 0x80)) && (reg != 0x7f) )
     {
         uint8_t _value = 0;
         burst_read(si443x, reg, &_value, 1);
@@ -145,33 +143,118 @@ static void si443x_switch_mode(si443x_t *si443x, si443x_antenna_mode_t mode)
 
 static void boot(si443x_t *si443x)
 {
-    change_register(si443x, REG_AFC_TIMING_CONTROL, 0x02); // refer to AN440 for reasons
-	change_register(si443x, REG_AFC_TIMING_CONTROL, 0x02); // refer to AN440 for reasons
-	change_register(si443x, REG_AFC_LIMITER, 0xFF); // write max value - excel file did that.
-	change_register(si443x, REG_AGC_OVERRIDE, 0x60); // max gain control
-	change_register(si443x, REG_AFC_LOOP_GEARSHIFT_OVERRIDE, 0x3C); // turn off AFC
+    SI443X_DEBUG_LOG("booting...");
+    // change_register(si443x, REG_AFC_TIMING_CONTROL, 0x02); // refer to AN440 for reasons
+	// change_register(si443x, REG_AFC_TIMING_CONTROL, 0x02); // refer to AN440 for reasons
+	// change_register(si443x, REG_AFC_LIMITER, 0xFF); // write max value - excel file did that.
+	// change_register(si443x, REG_AGC_OVERRIDE, 0x60); // max gain control
+	// change_register(si443x, REG_AFC_LOOP_GEARSHIFT_OVERRIDE, 0x3C); // turn off AFC
 
-    /* Configure the receive packet handler */
-	change_register(si443x, REG_DATAACCESS_CONTROL, 0xAD); // enable rx packet handling, enable tx packet handling, enable CRC, use CRC-IBM
-	change_register(si443x, REG_HEADER_CONTROL1, 0x0C); // no broadcast address control, enable check headers for bytes 3 & 2
-	change_register(si443x, REG_HEADER_CONTROL2, 0x22);  // enable headers uint8_t 3 & 2, no fixed package length, sync word 3 & 2
-	change_register(si443x, REG_PREAMBLE_LENGTH, 0x08); // 8 * 4 bits = 32 bits (4 bytes) preamble length
-	change_register(si443x, REG_PREAMBLE_DETECTION, 0x3A); // validate 7 * 4 bits of preamble  in a package
-	change_register(si443x, REG_SYNC_WORD3, 0x2D); // sync uint8_t 3 val
-	change_register(si443x, REG_SYNC_WORD2, 0xD4); // sync uint8_t 2 val
+    // /* Configure the receive packet handler */
+	// change_register(si443x, REG_DATAACCESS_CONTROL, 0xAD); // enable rx packet handling, enable tx packet handling, enable CRC, use CRC-IBM
+	// change_register(si443x, REG_HEADER_CONTROL1, 0x0C); // no broadcast address control, enable check headers for bytes 3 & 2
+	// change_register(si443x, REG_HEADER_CONTROL2, 0x22);  // enable headers uint8_t 3 & 2, no fixed package length, sync word 3 & 2
+	// change_register(si443x, REG_PREAMBLE_LENGTH, 0x08); // 8 * 4 bits = 32 bits (4 bytes) preamble length
+	// change_register(si443x, REG_PREAMBLE_DETECTION, 0x3A); // validate 7 * 4 bits of preamble  in a package
+    // //Set the sync word pattern to 0x2DD4
+	// change_register(si443x, REG_SYNC_WORD3, 0x2D); // sync uint8_t 3 val
+	// change_register(si443x, REG_SYNC_WORD2, 0xD4); // sync uint8_t 2 val
 
-	change_register(si443x, REG_TX_POWER, 0x1F); // max power
+	// change_register(si443x, REG_TX_POWER, 0x1F); // max power
 
-	change_register(si443x, REG_CHANNEL_STEPSIZE, 0x64); // each channel is of 1 Mhz interval
+	// change_register(si443x, REG_CHANNEL_STEPSIZE, 0x64); // each channel is of 1 Mhz interval
 
-    /*set the physical signal parameters*/
-    si443x_set_frequency(si443x, si443x->freq_carrier); // default freq
-    /*set the modem parameters according to the exel calculator(parameters: 100kbps, deviation: 25 kHz, channel filter BW: 112.1 kHz*/
-	si443x_set_baud_rate(si443x, si443x->kbps); // default baud rate is 100kbps
-	si443x_set_channel(si443x, si443x->freq_channel); // default channel is 0
-	si443x_set_comms_signature(si443x, si443x->package_sign); // default signature
+    // /*set the physical signal parameters*/
+    // si443x_set_frequency(si443x, si443x->freq_carrier); // default freq
+    // /*set the modem parameters according to the exel calculator(parameters: 100kbps, deviation: 25 kHz, channel filter BW: 112.1 kHz*/
+	// si443x_set_baud_rate(si443x, si443x->kbps); // default baud rate is 100kbps
+	// si443x_set_channel(si443x, si443x->freq_channel); // default channel is 0
+	// si443x_set_comms_signature(si443x, si443x->package_sign); // default signature														//write 0xD7 to the Crystal Oscillator Load Capacitance register
+    
+	/*set the physical parameters*/
+	//set the center frequency to 434 MHz
+	change_register(si443x, 0x75, 0x53);															//write 0x75 to the Frequency Band Select register             
+	change_register(si443x, 0x76, 0x64);															//write 0xBB to the Nominal Carrier Frequency1 register
+	change_register(si443x, 0x77, 0x00);  														//write 0x80 to the Nominal Carrier Frequency0 register
+	
+	//set the desired TX data rate (1.2kbps)
+	change_register(si443x, 0x6E, 0x09);															//write data to the TXDataRate 1 register
+	change_register(si443x, 0x6F, 0xD5);															//write data to the TXDataRate 0 register
+	change_register(si443x, 0x70, 0x2C);															//write data to the Modulation Mode Control 1 register
+	change_register(si443x, 0x58, 0x80);
 
-	si443x_switch_mode(si443x, SI443X_MODE_READY);
+	//set the Tx deviation register (+-20kHz)
+	change_register(si443x, 0x72, 0x20);															//write data to the Frequency Deviation register 
+
+
+	/*set the modem parameters according to the exel calculator(parameters: 1.2 kbps, deviation: 20 kHz*/
+	change_register(si443x, 0x1C, 0x2C);															//write data to the IF Filter Bandwidth register		
+	change_register(si443x, 0x20, 0x41);															//write data to the Clock Recovery Oversampling Ratio register		
+	change_register(si443x, 0x21, 0x60);															//write data to the Clock Recovery Offset 2 register		
+	change_register(si443x, 0x22, 0x27);															//write data to the Clock Recovery Offset 1 register		
+	change_register(si443x, 0x23, 0x52);															//write data to the Clock Recovery Offset 0 register		
+	change_register(si443x, 0x24, 0x00);															//write data to the Clock Recovery Timing Loop Gain 1 register		
+	change_register(si443x, 0x25, 0x04);															//write data to the Clock Recovery Timing Loop Gain 0 register		
+	change_register(si443x, 0x1D, 0x40);															//write data to the AFC Loop Gearshift Override register		
+	change_register(si443x, 0x1E, 0x0A);
+	change_register(si443x, 0x2A, 0x0F);															//write data to the AFC Limiter register		
+	change_register(si443x, 0x1F, 0x03);
+	change_register(si443x, 0x69, 0x60);
+
+	// //set the Modem test register 
+	// change_register(si443x, 0x56, 0xC1);															//write 0xC1 to the Modem test register
+
+
+	/*set the packet structure and the modulation type*/
+	//set the preamble length to 10bytes if the antenna diversity is used and set to 5bytes if not 
+	change_register(si443x, 0x34, 0x0C);															//write data to the Preamble Length register
+	//set preamble detection threshold to 20bits
+	change_register(si443x, 0x35, 0x2A); 														//write 0x2A to the Preamble Detection Control  register
+
+	//Disable header bytes; set variable packet length (the length of the payload is defined by the
+	//received packet length field of the packet); set the synch word to two bytes long
+	change_register(si443x, 0x33, 0x02);															//write 0x02 to the Header Control2 register    
+	
+	//Set the sync word pattern to 0x2DD4
+	change_register(si443x, 0x36, 0x2D);															//write 0x2D to the Sync Word 3 register
+	change_register(si443x, 0x37, 0xD4);															//write 0xD4 to the Sync Word 2 register
+
+	//enable the TX & RX packet handler and CRC-16 (IBM) check
+	change_register(si443x, 0x30, 0x8D);															//write 0x8D to the Data Access Control register
+	//Disable the receive header filters
+   change_register(si443x, 0x32, 0x00);															//write 0x00 to the Header Control1 register            
+	//enable FIFO mode and GFSK modulation
+	change_register(si443x, 0x71, 0x63);															//write 0x63 to the Modulation Mode Control 2 register
+
+	// /*set the GPIO's according to the RF switch */
+	// change_register(si443x, 0x0C, 0x12);															//write 0x12 to the GPIO1 Configuration(set the TX state)
+	// change_register(si443x, 0x0D, 0x15);															//write 0x15 to the GPIO2 Configuration(set the RX state) 
+
+	/*set the non-default Si4431 registers*/
+	//set the VCO and PLL
+	change_register(si443x, 0x57, 0x01);															//write 0x01 to the Chargepump Test register													
+	change_register(si443x, 0x59, 0x00);															//write 0x00 to the Divider Current Trimming register 	
+	change_register(si443x, 0x5A, 0x01); 														//write 0x01 to the VCO Current Trimming register
+	//set  cap. bank
+	change_register(si443x, 0x09, 0xD7);															//write 0xD7 to the Crystal Oscillator Load Capacitance register
+
+	// /*enable receiver chain*/
+	// change_register(si443x, 0x07, 0x05);															//write 0x05 to the Operating Function Control 1 register
+	// //Enable two interrupts: 
+	// // a) one wich shows that a valid preamble received:'ipreaval'
+	// // b) second shows if a sync word received:'iswdet'
+	// change_register(si443x, 0x05, 0x00); 														//write 0x00 to the Interrupt Enable 1 register
+	// change_register(si443x, 0x06, 0xC0); 														//write 0xC0 to the Interrupt Enable 2 register
+
+	// // set interrupts on for package received and CRC error
+	// change_register(si443x, 0x05, 0x03); 														//write 0x00 to the Interrupt Enable 1 register
+	// change_register(si443x, 0x06, 0xC0); 														//write 0xC0 to the Interrupt Enable 2 register
+	//read interrupt status registers to release all pending interrupts
+	uint8_t ItStatus1 = read_register(si443x, 0x03);													//read the Interrupt Status1 register
+	uint8_t ItStatus2 = read_register(si443x, 0x04);													//read the Interrupt Status2 register
+	printf("ITStatus1: 0x%02X\r\n", ItStatus1);
+	printf("ITStatus2: 0x%02X\r\n", ItStatus2);
+    si443x_switch_mode(si443x, SI443X_MODE_READY);
 }
 
 int8_t si443x_init(si443x_t *si443x)
@@ -228,19 +311,20 @@ void si443x_hardware_reset(si443x_t *si443x)
     //read interrupt status registers to clear the interrupt flags and release NIRQ pin
     it_status1 = read_register(si443x, REG_INT_STATUS1);
     it_status2 = read_register(si443x, REG_INT_STATUS2);
+    SI443X_DEBUG_PRINT("it_status1: %02x, it_status2: %02x\r\n", it_status1, it_status2);
 
-    // SW reset
-    change_register(si443x, REG_STATE, 0x80);
-
-    // wait for POR interrupt from the radio (while the nIRQ pin is high)
-    while(si443x_gpio_get_nirq(si443x) != 0);
-
-    // ichiprdy Chip SI443X_MODE_READY (XTAL).
-    // When a chip ready event has been detected this bit will be set to 1
-    do {
-        it_status2 = read_register(si443x, REG_INT_STATUS2);
-        SI443X_DELAY_MS(1);
-    } while((reg & 0x02) != 0x02);
+//    // SW reset
+//    change_register(si443x, REG_STATE, 0x80);
+//
+//    // wait for POR interrupt from the radio (while the nIRQ pin is high)
+//    while(si443x_gpio_get_nirq(si443x) != 0);
+//
+//    // ichiprdy Chip SI443X_MODE_READY (XTAL).
+//    // When a chip ready event has been detected this bit will be set to 1
+//    do {
+//        it_status2 = read_register(si443x, REG_INT_STATUS2);
+//        SI443X_DELAY_MS(1);
+//    } while((reg & 0x02) != 0x02);
 
     boot(si443x);
 }
@@ -262,7 +346,6 @@ void si443x_software_reset(si443x_t *si443x)
     } while((reg & 0x02) != 0x02);
 
     boot(si443x);
-    return SI443X_ERR_OK;
 }
 
 /**
@@ -289,136 +372,134 @@ void si443x_turn_off(si443x_t *si443x)
     SI443X_DELAY_MS(20);
 }
 
-/**
- * @brief Set the frequency of the chip. Call before boot.
- * 
- * @param si443x 
- * @param base_freq_MHz 
- * @return int8_t 
- */
-void si443x_set_frequency(si443x_t *si443x, uint16_t base_freq_MHz)
-{
-    if(base_freq_MHz < 240 || base_freq_MHz > 930) {
-        return ;
-    }
+// /**
+//  * @brief Set the frequency of the chip. Call before boot.
+//  * 
+//  * @param si443x 
+//  * @param base_freq_MHz 
+//  * @return int8_t 
+//  */
+// void si443x_set_frequency(si443x_t *si443x, uint16_t base_freq_MHz)
+// {
+//     if(base_freq_MHz < 240 || base_freq_MHz > 930) {
+//         return ;
+//     }
 
-    si443x->freq_carrier = base_freq_MHz;
-    uint8_t high_band = 0;
-    if(base_freq_MHz >= 480) {
-        high_band = 1;
-    }
+//     si443x->freq_carrier = base_freq_MHz;
+//     uint8_t high_band = 0;
+//     if(base_freq_MHz >= 480) {
+//         high_band = 1;
+//     }
 
-    double f_part = ((double)base_freq_MHz / (10 * (high_band + 1))) - 24;
+//     double f_part = ((double)base_freq_MHz / (10 * (high_band + 1))) - 24;
 
-    uint8_t freq_band = (uint8_t)f_part; // truncate the integer part
-    uint16_t freq_carr = (uint16_t)((f_part - freq_band) * 64000); // get the fractional part
+//     uint8_t freq_band = (uint8_t)f_part; // truncate the integer part
+//     uint16_t freq_carr = (uint16_t)((f_part - freq_band) * 64000); // get the fractional part
 
-    // sideband is always on (0x40)
-    uint8_t vals[3] = { 0x40 | (high_band << 5) | (freq_band & 0x3F), (uint8_t)(freq_carr >> 8), (uint8_t)(freq_carr & 0xFF) };
+//     // sideband is always on (0x40)
+//     uint8_t vals[3] = { (high_band << 5) | (freq_band & 0x3F) | 0x40, (uint8_t)(freq_carr >> 8), (uint8_t)(freq_carr & 0xFF) };
 
-    burst_write(si443x, REG_FREQBAND, vals, 3);
-}
+//     burst_write(si443x, REG_FREQBAND, vals, 3);
+// }
 
-/**
- * @brief Set the baud rate of the chip. Call before switching to tx or rx mode. - min:1, max: 256
- * 
- * @param si443x
- * @param kbps
- * 
- * @return int8_t 
- */
-void si443x_set_baud_rate(si443x_t *si443x, uint8_t kbps)
-{
-	// chip normally supports very low bps values, but they are cumbersome to implement - so I just didn't implement lower bps values
-    if ((kbps > 256) || (kbps < 1))
-    {
-        return SI443X_ERR_INVALID_PARAM;
-    }
-    si443x->kbps = kbps;
+// /**
+//  * @brief Set the baud rate of the chip. Call before switching to tx or rx mode. - min:1, max: 256
+//  * 
+//  * @param si443x
+//  * @param kbps
+//  * 
+//  * @return int8_t 
+//  */
+// void si443x_set_baud_rate(si443x_t *si443x, uint16_t kbps)
+// {
+// 	// chip normally supports very low bps values, but they are cumbersome to implement - so I just didn't implement lower bps values
+//     if ((kbps > 256) || (kbps < 1))
+//     {
+//         SI443X_DEBUG_LOG("Invalid baud rate");
+//         return ;
+//     }
+//     si443x->kbps = kbps;
 
-    uint8_t freq_dev = kbps <= 10 ? 15 : 150; // 15khz / 150 khz
-//  uint8_t modulation_value = kbps < 30 ? 0x4c : 0x0c; // use FIFO Mode, GFSK, low baud mode on / off
-    uint8_t modulation_value = kbps < 30 ? 0x2c : 0x0c; // use FIFO Mode, GFSK, low baud mode on / off
+//     uint8_t freq_dev = kbps <= 10 ? 15 : 150; // 15khz / 150 khz
+// //  uint8_t modulation_value = kbps < 30 ? 0x4c : 0x0c; // use FIFO Mode, GFSK, low baud mode on / off
+//     uint8_t modulation_value = kbps < 30 ? 0x2c : 0x0c; // use FIFO Mode, GFSK, low baud mode on / off
 
-    uint8_t modulation_vals[] = { modulation_value, 0x23, round((freq_dev * 1000.0) / 625.0) }; // msb of the kpbs to 3rd bit of register
-    burst_write(si443x, REG_MODULATION_MODE1, modulation_vals, 3); // 0x70
-    // set data rate
-    uint16_t bps_reg_val = round((kbps * 65536.0) / 1000.0);
-    uint8_t datarate_vals[] = { bps_reg_val >> 8, bps_reg_val & 0xFF };
+//     uint8_t modulation_vals[] = { modulation_value, 0x23, (uint8_t) round((freq_dev * 1000.0) / 625.0) }; // msb of the kpbs to 3rd bit of register
+//     burst_write(si443x, REG_MODULATION_MODE1, modulation_vals, 3); // 0x70
+//     // set data rate
+//     uint16_t bps_reg_val = (uint16_t) round((kbps * 65536.0) / 1000.0);
+//     uint8_t datarate_vals[] = { bps_reg_val >> 8, bps_reg_val & 0xFF };
 
-    burst_write(si443x, REG_TX_DATARATE1, datarate_vals, 2); // 0x6E
+//     burst_write(si443x, REG_TX_DATARATE1, datarate_vals, 2); // 0x6E
 
-    // now set the timings
-    uint16_t min_bandwidth = (2 * (uint32_t) freq_dev) + kbps;
+//     // now set the timings
+//     uint16_t min_bandwidth = (uint16_t) ((2 * (uint32_t) freq_dev) + kbps);
 
-    SI443X_DEBUG_PRINT("min Bandwidth value: 0x%02x\r\n", min_bandwidth);
+//     SI443X_DEBUG_PRINT("min Bandwidth value: 0x%02x\r\n", min_bandwidth);
 
-    uint8_t IFValue = 0x1D; // 0x1D is the default value
-    // since the table is ordered (from low to high), just find the 'minimum bandwidth which is greater than required'
-    for(uint8_t i = 0; i < 8; ++i) {
-        if(IFFilterTable[i][0] >= (min_bandwidth * 10)) {
-            IFValue = IFFilterTable[i][1];
-            break;
-        }
-    }
-    SI443X_DEBUG_PRINT("Selected IF value: 0x%02x\r\n", IFValue);
+//     uint8_t IFValue = 0x1D; // 0x1D is the default value
+//     // since the table is ordered (from low to high), just find the 'minimum bandwidth which is greater than required'
+//     for(uint8_t i = 0; i < 8; ++i) {
+//         if(IFFilterTable[i][0] >= (min_bandwidth * 10)) {
+//             IFValue = (uint8_t)IFFilterTable[i][1];
+//             break;
+//         }
+//     }
+//     SI443X_DEBUG_PRINT("Selected IF value: 0x%02x\r\n", IFValue);
 
-    change_register(si443x, REG_IF_FILTER_BW, IFValue);
+//     change_register(si443x, REG_IF_FILTER_BW, IFValue);
 
-    uint8_t dwn3_bypass = (IFValue & 0x80) ? 1 : 0; // if msb is set
-    uint8_t ndec_exp = (IFValue >> 4) & 0x07; // only 3 bits
+//     uint8_t dwn3_bypass = (IFValue & 0x80) ? 1 : 0; // if msb is set
+//     uint8_t ndec_exp = (IFValue >> 4) & 0x07; // only 3 bits
 
-    uint16_t rx_oversampling = round((500.0 * (1 + 2 * dwn3_bypass)) / ((pow(2, ndec_exp - 3)) * (double ) kbps));
+//     uint16_t rx_oversampling = (uint16_t) (round((500.0 * (1 + 2 * dwn3_bypass)) / ((pow(2, ndec_exp - 3)) * (double ) kbps)));
 
-    uint16_t nc_offset = round(((double) kbps * (pow(2, ndec_exp + 20))) / (500.0 * (1 + 2 * dwn3_bypass)));
+//     uint16_t nc_offset = (uint16_t) (round(((double) kbps * (pow(2, ndec_exp + 20))) / (500.0 * (1 + 2 * dwn3_bypass))));
 
-    uint16_t cr_gain = 2 + round((65535.0 * (double) kbps) / ((double) rx_oversampling * freq_dev));
-    uint8_t cr_multiplier = 0x00;
-	if (cr_gain > 0x7FF) {
-		cr_gain = 0x7FF;
-	}
+//     uint16_t cr_gain = (uint16_t) (2 + round((65535.0 * (double) kbps) / ((double) rx_oversampling * freq_dev)));
+//     uint8_t cr_multiplier = 0x00;
+// 	if (cr_gain > 0x7FF) {
+// 		cr_gain = 0x7FF;
+// 	}
 
-    SI443X_DEBUG_PRINT("dw3_bypass: %02x, ndec_exp: %02x, rx_oversampling: %04x, nc_offset: %04x, cr_gain: %04x, cr_multiplier: %02x\r\n",
-        dwn3_bypass, ndec_exp, rx_oversampling, nc_offset, cr_gain, cr_multiplier);
+//     SI443X_DEBUG_PRINT("dw3_bypass: %02x, ndec_exp: %02x, rx_oversampling: %04x, nc_offset: %04x, cr_gain: %04x, cr_multiplier: %02x\r\n",
+//         dwn3_bypass, ndec_exp, rx_oversampling, nc_offset, cr_gain, cr_multiplier);
 
-    uint8_t timingVals[] = { rx_oversampling & 0x00FF, ((rx_oversampling & 0x0700) >> 3) | ((nc_offset >> 16) & 0x0F),
-            (nc_offset >> 8) & 0xFF, nc_offset & 0xFF, ((cr_gain & 0x0700) >> 8) | cr_multiplier, cr_gain & 0xFF };
+//     uint8_t timingVals[] = { rx_oversampling & 0x00FF, ((rx_oversampling & 0x0700) >> 3) | ((nc_offset >> 16) & 0x0F),
+//             (nc_offset >> 8) & 0xFF, nc_offset & 0xFF, ((cr_gain & 0x0700) >> 8) | cr_multiplier, cr_gain & 0xFF };
 
-    burst_write(si443x, REG_CLOCK_RECOVERY_OVERSAMPLING, timingVals, 6);
+//     burst_write(si443x, REG_CLOCK_RECOVERY_OVERSAMPLING, timingVals, 6);
+// }
 
-    return SI443X_ERR_OK;
-}
+// /**
+//  * @brief Set the channel of the chip. Call before switching to tx or rx mode.
+//  * 
+//  * @param si443x 
+//  * @param channel 
+//  * @return int8_t 
+//  */
+// void si443x_set_channel(si443x_t *si443x, uint8_t channel)
+// {
+//     si443x->freq_channel = channel;
+//     change_register(si443x, REG_FREQCHANNEL, channel);
+// }
 
-/**
- * @brief Set the channel of the chip. Call before switching to tx or rx mode.
- * 
- * @param si443x 
- * @param channel 
- * @return int8_t 
- */
-void si443x_set_channel(si443x_t *si443x, uint8_t channel)
-{
-    si443x->freq_channel = channel;
-    change_register(si443x, REG_FREQCHANNEL, channel);
-}
-
-/**
- * @brief used to 'sign' packets with a predetermined signature - call before boot
- * 
- * @param si443x 
- * @param signature 
- * @return int8_t 
- */
-void si443x_set_comms_signature(si443x_t *si443x, uint16_t signature)
-{
-    si443x->package_sign = signature;
-    change_register(si443x, REG_TRANSMIT_HEADER3, (uint8_t)(signature >> 8));
-    change_register(si443x, REG_TRANSMIT_HEADER2, (uint8_t)(signature & 0xFF));
-    change_register(si443x, REG_CHECK_HEADER3, (uint8_t)(signature >> 8));
-    change_register(si443x, REG_CHECK_HEADER2, (uint8_t)(signature & 0xFF));
-    SI443X_DEBUG_LOG("Package signature is set");
-    return SI443X_ERR_OK;
-}
+// /**
+//  * @brief used to 'sign' packets with a predetermined signature - call before boot
+//  * 
+//  * @param si443x 
+//  * @param signature 
+//  * @return int8_t 
+//  */
+// void si443x_set_comms_signature(si443x_t *si443x, uint16_t signature)
+// {
+//     si443x->package_sign = signature;
+//     change_register(si443x, REG_TRANSMIT_HEADER3, (uint8_t)(signature >> 8));
+//     change_register(si443x, REG_TRANSMIT_HEADER2, (uint8_t)(signature & 0xFF));
+//     change_register(si443x, REG_CHECK_HEADER3, (uint8_t)(signature >> 8));
+//     change_register(si443x, REG_CHECK_HEADER2, (uint8_t)(signature & 0xFF));
+//     SI443X_DEBUG_LOG("Package signature is set");
+// }
 
 void si443x_read_all(si443x_t *si443x)
 {
@@ -437,7 +518,9 @@ int8_t si443x_send_packet(si443x_t *si443x, const uint8_t* data, uint8_t length)
     // set the length of the payload to 'length'	
 	change_register(si443x, REG_PKG_LEN, length);
     // fill the payload into the transmit FIFO
-	burst_write(si443x, REG_FIFO, data, length);
+	for (uint8_t i = 0; i < length; ++i) {
+        change_register(si443x, REG_FIFO, data[i]);
+    }
 
     //Disable all other interrupts and enable the packet sent interrupt only.
     //This will be used for indicating the successfull packet transmission for the MCU
@@ -455,31 +538,32 @@ int8_t si443x_send_packet(si443x_t *si443x, const uint8_t* data, uint8_t length)
     //The MCU just needs to wait for the 'ipksent' interrupt.
 	uint32_t timeout = 0;
     do {
-        uint8_t int_status = read_register(si443x, REG_INT_STATUS1);
-        if(int_status & 0x04) { // Packet Sent Interrupt
-            si443x_switch_mode(si443x, SI443X_MODE_READY | SI443X_MODE_TUNE);
-            return SI443X_ERR_OK;
+        if(si443x_gpio_get_nirq(si443x) == 0)
+        {
+            uint8_t int_status = read_register(si443x, REG_INT_STATUS1);
+            uint8_t int_status2 = read_register(si443x, REG_INT_STATUS2);
+            SI443X_DEBUG_PRINT("[si443x_send_packet] REG_INT_STATUS1=%02x, REG_INT_STATUS2=%02x\r\n", int_status, int_status2);
+            if(int_status & 0x04) { // Packet Sent Interrupt
+                si443x_switch_mode(si443x, SI443X_MODE_READY | SI443X_MODE_TUNE);
+                // change_register(si443x, REG_INT_ENABLE1, 0x00); // set interrupts off for anything else
+                // change_register(si443x, REG_INT_ENABLE2, 0xC0); // set interrupts off for anything else
+                return SI443X_ERR_OK;
+            }
         }
-        if(si443x_gpio_get_nirq(si443x) == 0) {
-            return SI443X_ERR_OK;
-        }
-    } while(timeout++ < MAX_TRANSMIT_TIMEOUT_MS);
+        // uint8_t int_status = read_register(si443x, REG_INT_STATUS1);
+        // if(int_status & 0x04 || si443x_gpio_get_nirq(si443x) == 0) { // Packet Sent Interrupt
+        //     si443x_switch_mode(si443x, SI443X_MODE_READY | SI443X_MODE_TUNE);
+        //     // change_register(si443x, REG_INT_ENABLE1, 0x00); // set interrupts off for anything else
+        //     // change_register(si443x, REG_INT_ENABLE2, 0xC0); // set interrupts off for anything else
+        //     return SI443X_ERR_OK;
+        // }
+    } while(timeout++ < 20000);
 
 	SI443X_DEBUG_PRINT("Timeout in Transit -- ");
     si443x_hardware_reset(si443x);
 
 	return SI443X_ERR_TIMEOUT;
 }
-
-void si443x_get_packet_received(si443x_t *si443x, uint8_t* readData, uint8_t* length)
-{
-	*length = read_register(si443x, REG_RECEIVED_LENGTH);
-
-    burst_read(si443x, REG_FIFO, readData, *length);
-
-	si443x_clear_rxFIFO(si443x); // which will also clear the interrupts
-}
-
 
 void si443x_clear_txFIFO(si443x_t *si443x) 
 {
@@ -507,56 +591,99 @@ void si443x_start_listening(si443x_t *si443x)
 
 
 	si443x_clear_rxFIFO(si443x); // clear first, so it doesn't overflow if packet is big
-
 	change_register(si443x, REG_INT_ENABLE1, 0x03); // set interrupts on for package received and CRC error
+    // change_register(si443x, REG_INT_ENABLE1, 0x00); // set interrupts off for package received and CRC error
 
-#ifdef SI443X_DEBUG
-	change_register(si443x, REG_INT_ENABLE2, 0xC0);
-#else
+// #ifdef SI443X_DEBUG
+	// change_register(si443x, REG_INT_ENABLE2, 0xC0);
+// #else
 	change_register(si443x, REG_INT_ENABLE2, 0x00); // set other interrupts off
-#endif
+// #endif
 	//read interrupt registers to clean them
 	read_register(si443x, REG_INT_STATUS1);
 	read_register(si443x, REG_INT_STATUS2);
 
     si443x_switch_mode(si443x, SI443X_MODE_RX | SI443X_MODE_READY);
-
-    return SI443X_ERR_OK;
 }
 
 
-void si443x_is_packetReceived(si443x_t *si443x) 
+int8_t si443x_is_packetReceived(si443x_t *si443x) 
 {
-
+    uint32_t timeout = 0;
     // if no interrupt occurred, no packet received is assumed (since startListening will be called prior, this assumption is enough)
 	if (si443x_gpio_get_nirq(si443x) == 1) {
         return SI443X_ERR_NO_PACKET;
     }
 	// check for package received status interrupt register
 	uint8_t int_stat1 = read_register(si443x, REG_INT_STATUS1);
-    SI443X_DEBUG_PRINT("isPacketReceived REG_INT_STATUS1=%02x\r\n", int_stat1);
-
 	uint8_t int_stat2 = read_register(si443x, REG_INT_STATUS2);
+
+    SI443X_DEBUG_PRINT("isPacketReceived REG_INT_STATUS1=%02x\r\n", int_stat1);
     SI443X_DEBUG_PRINT("isPacketReceived REG_INT_STATUS2=%02x\r\n", int_stat2);
 
 	if (int_stat2 & 0x40) { //interrupt occurred, check it && read the Interrupt Status1 register for 'preamble '
         SI443X_DEBUG_PRINT("Valid Preamble detected -- %02x\r\n", int_stat2);
+        // // wait for the synch word interrupt with timeout -- THIS is the proposed SW workaround
+        // // start a timer in the MCU and during timeout check whether synch word interrupt happened or not
+        // timeout = 0;
+        // do {
+        //     timeout++;
+        // } while( timeout < MAX_TRANSMIT_TIMEOUT_MS && si443x_gpio_get_nirq(si443x) == 1);
+        // if (timeout >= MAX_TRANSMIT_TIMEOUT_MS) {
+        //     SI443X_DEBUG_PRINT("Timeout in waiting for Sync Word -- ");
+        //     si443x_hardware_reset(si443x);
+        //     return SI443X_ERR_TIMEOUT;
+        // }
 	}
 
 	if (int_stat2 & 0x80) { //interrupt occurred, check it && read the Interrupt Status1 register for 'preamble '
+        // if (si443x_gpio_get_nirq(si443x) == 1) {
+        //     return SI443X_ERR_NO_PACKET;
+        // }
         SI443X_DEBUG_PRINT("SYNC WORD detected -- %02x\r\n", int_stat2);
+        // //Enable two interrupts: 
+        // // a) one which shows that a valid packet received: 'ipkval'
+        // // b) second shows if the packet received with incorrect CRC: 'icrcerror' 
+        // change_register(si443x, 0x05, 0x03); 										//write 0x03 to the Interrupt Enable 1 register
+        // change_register(si443x, 0x06, 0x00); 										//write 0x00 to the Interrupt Enable 2 register
+        // //read interrupt status registers to release all pending interrupts
+        // uint8_t ItStatus1 = read_register(si443x, 0x03);									//read the Interrupt Status1 register
+        // uint8_t ItStatus2 = read_register(si443x, 0x04);									//read the Interrupt Status2 register
+        // //wait for the interrupt event
+        // //If it occurs, then it means a packet received or CRC error happened
+        // timeout = 0;
+        // while(si443x_gpio_get_nirq(si443x) == 1 && timeout < MAX_TRANSMIT_TIMEOUT_MS)
+        // {
+        //     timeout++;
+        // }
+        // if (timeout >= MAX_TRANSMIT_TIMEOUT_MS) {
+        //     SI443X_DEBUG_PRINT("Timeout in waiting for Packet Received -- ");
+        //     si443x_hardware_reset(si443x);
+        //     return SI443X_ERR_TIMEOUT;
+        // }
+        // //disable the receiver chain 
+        // change_register(si443x, 0x07, 0x01);											//write 0x01 to the Operating Function Control 1 register
+        // // read interrupt status registers 
+        // ItStatus1 = read_register(si443x, 0x03);									//read the Interrupt Status1 register
+        // ItStatus2 = read_register(si443x, 0x04);									//read the Interrupt Status2 register
+        // SI443X_DEBUG_PRINT("ItStatus1 = %02X\n", ItStatus1);
+        // SI443X_DEBUG_PRINT("ItStatus2 = %02X\n", ItStatus2);
 
 	}
 
 	if (int_stat1 & 0x02) { //interrupt occurred, check it && read the Interrupt Status1 register for 'valid packet'
-		si443x_switch_mode(si443x, SI443X_MODE_READY | SI443X_MODE_TUNE); // if packet came, get out of Rx mode till the packet is read out. Keep PLL on for fast reaction
         SI443X_DEBUG_PRINT("Packet detected -- %02x\r\n", int_stat1);
+		// si443x_switch_mode(si443x, SI443X_MODE_READY | SI443X_MODE_TUNE); // if packet came, get out of Rx mode till the packet is read out. Keep PLL on for fast reaction
+        si443x_switch_mode(si443x, SI443X_MODE_READY);
 		return SI443X_ERR_OK;
 	} else if (int_stat1 & 0x01) { // packet crc error
 		si443x_switch_mode(si443x, SI443X_MODE_READY); // get out of Rx mode till buffers are cleared
         SI443X_DEBUG_PRINT("CRC Error in Packet detected -- %02x\r\n", int_stat1);
 		si443x_clear_rxFIFO(si443x);
 		si443x_switch_mode(si443x, SI443X_MODE_RX | SI443X_MODE_READY); // get back to work
+        uint8_t int_enable1 = read_register(si443x, REG_INT_ENABLE1);
+        uint8_t int_enable2 = read_register(si443x, REG_INT_ENABLE2);
+        SI443X_DEBUG_PRINT("int_enable1: %02x, int_enable2: %02x\r\n", int_enable1, int_enable2);
 		return SI443X_ERR_CRC;
 	}
 
@@ -564,3 +691,18 @@ void si443x_is_packetReceived(si443x_t *si443x)
 
 	return SI443X_ERR_NO_PACKET;
 }
+
+
+uint8_t si443x_get_packet_received(si443x_t *si443x, uint8_t* readData)
+{
+	uint8_t length = read_register(si443x, REG_RECEIVED_LENGTH);
+
+    // burst_read(si443x, REG_FIFO, readData, length);
+    for(uint8_t i = 0; i < length; ++i) {
+        readData[i] = read_register(si443x, REG_FIFO);
+    }
+
+	si443x_clear_rxFIFO(si443x); // which will also clear the interrupts
+}
+
+

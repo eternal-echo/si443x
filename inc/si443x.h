@@ -3,7 +3,6 @@
 
 #include <stdio.h>
 #include <stdint.h>
-#include "si443x_io.h"
 
 #define SI443X_ERR_OK 0
 #define SI443X_ERR_INVALID_PARAM -1
@@ -16,7 +15,7 @@ typedef struct {
     /* hardware */
 
     /* attributes */
-    uint64_t freq_carrier;
+    uint16_t freq_carrier;
     uint8_t freq_channel;
     uint16_t kbps;
     uint16_t package_sign;
@@ -122,16 +121,16 @@ void si443x_hardware_reset(si443x_t *si443x);
 void si443x_software_reset(si443x_t *si443x);
 void si443x_turn_on(si443x_t *si443x);
 void si443x_turn_off(si443x_t *si443x);
-void si443x_set_frequency(si443x_t *si443x, uint16_t base_freq_MHz);
-void si443x_set_baud_rate(si443x_t *si443x, uint8_t kbps);
-void si443x_set_channel(si443x_t *si443x, uint8_t channel);
-void si443x_set_comms_signature(si443x_t *si443x, uint16_t signature);
+// void si443x_set_frequency(si443x_t *si443x, uint16_t base_freq_MHz);
+// void si443x_set_baud_rate(si443x_t *si443x, uint16_t kbps);
+// void si443x_set_channel(si443x_t *si443x, uint8_t channel);
+// void si443x_set_comms_signature(si443x_t *si443x, uint16_t signature);
 void si443x_read_all(si443x_t *si443x);
 int8_t si443x_send_packet(si443x_t *si443x, const uint8_t* data, uint8_t length);
-void si443x_get_packet_received(si443x_t *si443x, uint8_t* readData, uint8_t* length);
+uint8_t si443x_get_packet_received(si443x_t *si443x, uint8_t* readData);
 void si443x_clear_txFIFO(si443x_t *si443x);
 void si443x_clear_rxFIFO(si443x_t *si443x);
 void si443x_clear_FIFO(si443x_t *si443x);
 void si443x_start_listening(si443x_t *si443x);
-void si443x_is_packetReceived(si443x_t *si443x);
+int8_t si443x_is_packetReceived(si443x_t *si443x);
 #endif /* SI443x_H_ */

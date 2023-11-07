@@ -5,8 +5,19 @@
 #include "si443x.h"
 
 #define SI443X_DEBUG
-#define SI443X_DEBUG_PRINT
-#define SI443X_DEBUG_LOG
+
+#ifdef SI443X_DEBUG
+    #define SI443X_DEBUG_LOG(str) printf(str"\r\n")
+#else
+    #define SI443X_DEBUG_LOG(str)
+#endif
+
+#ifdef SI443X_DEBUG
+    #define SI443X_DEBUG_PRINT(...) printf(__VA_ARGS__)
+#else
+    #define SI443X_DEBUG_PRINT(...)
+#endif
+
 #define SI443X_DELAY_MS
 
 // SPI接口函数

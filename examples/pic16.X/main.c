@@ -31,7 +31,7 @@
     THIS SOFTWARE.
 */
 #include "mcc_generated_files/system/system.h"
-
+#include "../../inc/si443x.h"
 /*
     Main application
 */
@@ -56,8 +56,32 @@ int main(void)
     // Disable the Peripheral Interrupts 
     //INTERRUPT_PeripheralInterruptDisable(); 
     printf("Si443x driver example\r\n");
+    si443x_t si443x;
+    si443x_init(&si443x);
+    si443x_start_listening(&si443x);
+    si443x_read_all(&si443x);
 
     while(1)
     {
+        if(BUTTON_GetValue() == 0)
+        {
+            while(BUTTON_GetValue() == 0);
+            printf("Sending...\r\n");
+            const uint8_t data[] = "Hello";
+            si443x_send_packet(&si443x, data, sizeof(data));
+            printf("Sent: %s\r\n", data);
+            si443x_start_listening(&si443x);
+        }
+        if(si443x_is_packetReceived(&si443x) == SI443X_ERR_OK)
+        {
+            uint8_t readData[64];
+            uint8_t length;
+            printf("[rx] Packet received\r\n");
+            length = si443x_get_packet_received(&si443x, readData);
+            printf("[rx] payload: %s\r\n", readData);
+            printf("\r\n");
+
+            si443x_start_listening(&si443x);
+        }
     }    
 }

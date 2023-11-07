@@ -21,7 +21,7 @@ __attribute__((weak)) void si443x_gpio_reset_cs(si443x_t *si443x) {
 }
 
 __attribute__((weak)) void si443x_gpio_set_sdn(si443x_t *si443x) {
-    
+
 }
 
 __attribute__((weak)) void si443x_gpio_reset_sdn(si443x_t *si443x) {
