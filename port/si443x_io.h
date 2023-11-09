@@ -4,21 +4,22 @@
 #include <stdint.h>
 #include "si443x.h"
 
-#define SI443X_DEBUG
+#include "../../mcc_generated_files/mcc.h"
 
+#define SI443X_DEBUG
 #ifdef SI443X_DEBUG
-    #define SI443X_DEBUG_LOG(str) printf(str"\r\n")
+    #define SI443X_DEBUG_LOG(str) printf("[radio][debug]"str"\r\n")
 #else
     #define SI443X_DEBUG_LOG(str)
 #endif
 
 #ifdef SI443X_DEBUG
-    #define SI443X_DEBUG_PRINT(...) printf(__VA_ARGS__)
+    #define SI443X_DEBUG_PRINT(...) printf("[radio][debug]"__VA_ARGS__)
 #else
     #define SI443X_DEBUG_PRINT(...)
 #endif
 
-#define SI443X_DELAY_MS
+#define SI443X_DELAY_MS __delay_ms
 
 // SPI接口函数
 void si443x_spi_init(si443x_t *si443x);
